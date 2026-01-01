@@ -1,2 +1,2 @@
-pytrends
 requests
+beautifulsoup4
