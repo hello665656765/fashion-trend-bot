@@ -1,17 +1,21 @@
 import json
+import os
 from datetime import datetime
+
 from scrapers.zara import get_zara_trends
 from scrapers.hm import get_hm_trends
 from scrapers.asos import get_asos_trends
 
 def run():
+    print("Fashion Trend Bot started")
+
+    os.makedirs("output", exist_ok=True)
+
     results = {
         "timestamp": datetime.utcnow().isoformat(),
         "men": [],
         "women": []
     }
-
-    print("Fashion Trend Bot started")
 
     print("Checking Zara")
     zara = get_zara_trends()
