@@ -23,3 +23,10 @@ jobs:
 
       - name: Run bot
         run: python bot.py
+        
+      - name: Upload trends artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fashion-trends
+          path: output/trends.json
+
