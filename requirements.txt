@@ -1,3 +1,4 @@
-playwright
+requests
+beautifulsoup4
+demjson3
 python-dotenv
-shopify
