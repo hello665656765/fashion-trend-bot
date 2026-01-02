@@ -3,75 +3,51 @@ import os
 from datetime import datetime, timezone
 from scrapers.zara import get_zara_trends
 
-# Optional: import H&M if you have it and want to use it
-try:
-    from scrapers.hm import get_hm_trends
-    HAVE_HM = True
-except ImportError:
-    HAVE_HM = False
-    print("Note: H&M scraper not found - skipping")
-
 def run():
-    print("\n" + "="*40)
-    print("Fashion Trend Bot - Started")
-    print(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"))
-    print("="*40 + "\n")
+    print("\n" + "═" * 60)
+    print("Fashion Trend Bot | Zara + ZenRows Edition")
+    print("Started:", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"))
+    print("═" * 60 + "\n")
 
     all_products = {"men": [], "women": []}
 
-    # === Zara ===
     print("Scraping Zara...")
     try:
-        zara_data = get_zara_trends()
-        all_products["men"].extend(zara_data.get("men", []))
-        all_products["women"].extend(zara_data.get("women", []))
-        print(f"→ Zara collected: {len(zara_data.get('men', []))} men's + {len(zara_data.get('women', []))} women's products")
+        zara = get_zara_trends()
+        print(f"DEBUG: Zara scraper returned {len(zara['men'])} men's + {len(zara['women'])} women's products")
+        all_products["men"].extend(zara["men"])
+        all_products["women"].extend(zara["women"])
+        print(f"Zara success → {len(zara['men'])} men's + {len(zara['women'])} women's products collected")
     except Exception as e:
-        print(f"Zara failed: {str(e)}")
+        print(f"Zara failed: {e}")
 
-    # === H&M (optional) ===
-    if HAVE_HM:
-        print("\nScraping H&M...")
-        try:
-            hm_data = get_hm_trends()
-            all_products["men"].extend(hm_data.get("men", []))
-            all_products["women"].extend(hm_data.get("women", []))
-            print(f"→ H&M collected: {len(hm_data.get('men', []))} men's + {len(hm_data.get('women', []))} women's products")
-        except Exception as e:
-            print(f"H&M failed: {str(e)}")
-    else:
-        print("H&M skipped (no scraper available)")
+    # Summary
+    total = len(all_products["men"]) + len(all_products["women"])
+    print("\n" + "─" * 60)
+    print(f"Total products collected: {total}")
+    print("─" * 60)
 
-    # === Summary ===
-    total_men = len(all_products["men"])
-    total_women = len(all_products["women"])
-    print("\n" + "-"*40)
-    print(f"Total collected: {total_men} men's + {total_women} women's products")
-    print("-"*40)
+    if all_products["men"]:
+        print("\nSample men's products (first 3):")
+        for p in all_products["men"][:3]:
+            print(f" • {p.get('name', 'N/A')} | {p.get('price', 'N/A')} | {p.get('url', 'N/A')}")
 
-    if total_men > 0:
-        print("\nSample Men's products:")
-        for item in all_products["men"][:3]:
-            print(f" - {item.get('name', 'N/A')} | {item.get('price', 'N/A')} | {item.get('url', 'N/A')}")
+    if all_products["women"]:
+        print("\nSample women's products (first 3):")
+        for p in all_products["women"][:3]:
+            print(f" • {p.get('name', 'N/A')} | {p.get('price', 'N/A')} | {p.get('url', 'N/A')}")
 
-    if total_women > 0:
-        print("\nSample Women's products:")
-        for item in all_products["women"][:3]:
-            print(f" - {item.get('name', 'N/A')} | {item.get('price', 'N/A')} | {item.get('url', 'N/A')}")
-
-    # === Save to JSON ===
+    # Save
     os.makedirs("output", exist_ok=True)
     timestamp = datetime.now(timezone.utc).isoformat()
-    data = {
-        "timestamp": timestamp,
-        "products": all_products
-    }
-    output_file = "output/trends.json"
-    with open(output_file, "w", encoding="utf-8") as f:
+    data = {"timestamp": timestamp, "products": all_products}
+    
+    path = "output/trends.json"
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-
-    print(f"\nResults saved to: {output_file}")
-    print("\nDone! You can now run the Shopify importer if ready.\n")
+    
+    print(f"\nResults saved to: {path}")
+    print("Finished.\n")
 
 
 if __name__ == "__main__":
